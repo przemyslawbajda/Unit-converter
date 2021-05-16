@@ -13,6 +13,8 @@ import javax.swing.JComboBox;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 /**
  *
@@ -22,21 +24,21 @@ import java.util.Objects;
 
 public class App extends JFrame implements ActionListener{
     
-     Unit METER = new Unit("Metr", 1); 
-     Unit FEET = new Unit("Stopa", 0.3048); 
+     Unit METER = new Unit("Meter", 1); 
+     Unit FEET = new Unit("Feet", 0.3048); 
 
     
     
     JTextField textField = new JTextField(10); // pole tekstowe
     
     
-    String[] units = {"Metr", "Stopa"};
+    String[] units = {METER.getName(), FEET.getName()};
     
     JComboBox[] unitbox = new JComboBox[2]; //komponent ktory pozwala wybrac wprowadzana jednostke
     
     JLabel[] text = new JLabel[2];
     
-    JButton button = new JButton("Konwertuj");
+    JButton button = new JButton("Convert");
     
     
     
@@ -44,7 +46,7 @@ public class App extends JFrame implements ActionListener{
     public void actionPerformed(ActionEvent e){ //listener zawierajacy kod który wykona sie przy nacisnieciu przycisku
         
         if(textField.getText().isEmpty()){ //sprawdza czy pole do wpisywania wartosci jest puste
-            JOptionPane.showMessageDialog(null, "Podaj wartość do przekonwertowania");//jesli tak to wyswietla komunikat
+            JOptionPane.showMessageDialog(null, "Insert value to convert");//jesli tak to wyswietla komunikat
         }else{                                                                      //jesli nie, rozpoczyna rzutowanie i konwersje
             double number =Double.parseDouble(textField.getText());    
             String convrt_from = (String)unitbox[0].getSelectedItem();
@@ -62,7 +64,7 @@ public class App extends JFrame implements ActionListener{
         SpringLayout layout = new SpringLayout(); //utworzenie layoutu
         this.setLayout(layout); //dodanie layoutu do okna aplikacji
         
-        this.add(text[0]= new JLabel("Wybierz jednostke i wpisz wartosc:"));// dodanie napisu
+        this.add(text[0]= new JLabel("Choose unit and insert value:"));// dodanie napisu
         layout.putConstraint(SpringLayout.WEST, text[0], 80, SpringLayout.EAST, this);
         layout.putConstraint(SpringLayout.NORTH, text[0], 80, SpringLayout.NORTH, this);
         
@@ -75,7 +77,7 @@ public class App extends JFrame implements ActionListener{
         layout.putConstraint(SpringLayout.WEST, unitbox[0], 20, SpringLayout.EAST, textField );
         layout.putConstraint(SpringLayout.NORTH, unitbox[0], 100, SpringLayout.NORTH, this);
         
-        this.add(text[1]= new JLabel("Wybierz jednostke na która konwertujesz"));
+        this.add(text[1]= new JLabel("Choose unit you want to convert:"));
         layout.putConstraint(SpringLayout.WEST, text[1], 60, SpringLayout.EAST, this);
         layout.putConstraint(SpringLayout.NORTH, text[1], 15, SpringLayout.SOUTH, textField);
         
@@ -93,7 +95,7 @@ public class App extends JFrame implements ActionListener{
         
         this.setSize(400,400);
         this.setVisible(true);
-        this.setTitle("Konwerter jednostek!");
+        this.setTitle("Unit converter!");
         
     }
     
@@ -103,11 +105,14 @@ public class App extends JFrame implements ActionListener{
         Unit unitConvertFrom = new Unit(checkUnitType(convrt_from));
         Unit unitConvertTo = new Unit(checkUnitType(convrt_to));
     
+        if(!checkifsame(unitConvertFrom, unitConvertTo)){
+            result = BigDecimal.valueOf( (value*unitConvertFrom.getConversionRate())/unitConvertTo.getConversionRate())
+                    .setScale(4, RoundingMode.HALF_UP).doubleValue();
+            
+            JOptionPane.showMessageDialog(null, value+" "+unitConvertFrom.getName()+ " = "+ result+" "+ unitConvertTo.getName());
+        }
         
-        result = (value*unitConvertFrom.getConversionRate())/unitConvertTo.getConversionRate();
         
-
-        JOptionPane.showMessageDialog(null, value+" "+unitConvertFrom.getName()+ " to "+ result+" "+ unitConvertTo.getName());
 
     }
     
@@ -124,9 +129,9 @@ public class App extends JFrame implements ActionListener{
             
     }
     
-    public static boolean checkifsame(String convrt_from, String convrt_to){ //funkcja sprawdza czy nie ma nastąpić konwersja z tej samej jendostki
-        if(Objects.equals(convrt_from, convrt_to)){
-           JOptionPane.showMessageDialog(null, "Konwersja zdaje się byc niepotrzebna");
+    private boolean checkifsame(Unit convrt_from, Unit convrt_to){ 
+        if(convrt_from.getName().equals(convrt_to.getName())){
+           JOptionPane.showMessageDialog(null, "Conversion seems unnessesary");
            return true; 
         }
         return false;
