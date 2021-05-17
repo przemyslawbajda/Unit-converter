@@ -15,7 +15,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author USER
@@ -26,13 +28,14 @@ public class App extends JFrame implements ActionListener{
     
      Unit METER = new Unit("Meter", 1); 
      Unit FEET = new Unit("Feet", 0.3048); 
-
+     
+     List<Unit> unitList = new ArrayList<Unit>();
     
     
     JTextField textField = new JTextField(10); // pole tekstowe
     
     
-    String[] units = {METER.getName(), FEET.getName()};
+     List<String> unitNameList = new ArrayList<>();
     
     JComboBox[] unitbox = new JComboBox[2]; //komponent ktory pozwala wybrac wprowadzana jednostke
     
@@ -40,6 +43,21 @@ public class App extends JFrame implements ActionListener{
     
     JButton button = new JButton("Convert");
     
+    
+    
+    void fillUnitList(List<Unit> unitList){
+        unitList.add(new Unit("Meter", 1));
+        unitList.add(new Unit("Feet", 0.3048));
+        unitList.add(new Unit("Kilometer", 1000));
+    }
+    
+    void fillUnitNameList(List<Unit> unitList, List<String> unitNameList){
+        
+        for(int i=0; i<unitList.size(); i++){
+            unitNameList.add(unitList.get(i).getName());
+            
+        }
+    }
     
     
     @Override //napisanie z ActionListener
@@ -60,6 +78,9 @@ public class App extends JFrame implements ActionListener{
 
     App(){
         
+        fillUnitList(unitList);
+        
+        fillUnitNameList(unitList, unitNameList);
         
         SpringLayout layout = new SpringLayout(); //utworzenie layoutu
         this.setLayout(layout); //dodanie layoutu do okna aplikacji
@@ -73,7 +94,7 @@ public class App extends JFrame implements ActionListener{
         layout.putConstraint(SpringLayout.WEST, textField, 80, SpringLayout.EAST, this);
         layout.putConstraint(SpringLayout.NORTH, textField, 100, SpringLayout.NORTH, this);
         
-        this.add(unitbox[0]=new JComboBox(units)); // inicjalizacja komponentu w którym możliwe jest wybranie jednostki
+        this.add(unitbox[0]=new JComboBox(unitNameList.toArray())); // inicjalizacja komponentu w którym możliwe jest wybranie jednostki
         layout.putConstraint(SpringLayout.WEST, unitbox[0], 20, SpringLayout.EAST, textField );
         layout.putConstraint(SpringLayout.NORTH, unitbox[0], 100, SpringLayout.NORTH, this);
         
@@ -81,7 +102,7 @@ public class App extends JFrame implements ActionListener{
         layout.putConstraint(SpringLayout.WEST, text[1], 60, SpringLayout.EAST, this);
         layout.putConstraint(SpringLayout.NORTH, text[1], 15, SpringLayout.SOUTH, textField);
         
-        this.add(unitbox[1]=new JComboBox(units));
+        this.add(unitbox[1]=new JComboBox(unitNameList.toArray()));
         layout.putConstraint(SpringLayout.WEST, unitbox[1], 130, SpringLayout.WEST, this);
         layout.putConstraint(SpringLayout.NORTH, unitbox[1], 10, SpringLayout.SOUTH, text[1]);
         
@@ -102,8 +123,8 @@ public class App extends JFrame implements ActionListener{
     private void convert(double value, String convrt_from, String convrt_to){
         double result;
         
-        Unit unitConvertFrom = new Unit(checkUnitType(convrt_from));
-        Unit unitConvertTo = new Unit(checkUnitType(convrt_to));
+        Unit unitConvertFrom = new Unit(checkUnitType(convrt_from, unitList));
+        Unit unitConvertTo = new Unit(checkUnitType(convrt_to, unitList));
     
         if(!checkifsame(unitConvertFrom, unitConvertTo)){
             result = BigDecimal.valueOf( (value*unitConvertFrom.getConversionRate())/unitConvertTo.getConversionRate())
@@ -116,16 +137,17 @@ public class App extends JFrame implements ActionListener{
 
     }
     
-    private Unit checkUnitType(String s){
-        if(s.equals(METER.getName())){
-                    return METER;
-        } else if(s.equals(FEET.getName())){
-                    return FEET;
-        } else{
-           return null; 
+    private Unit checkUnitType(String s, List<Unit> unitList){
+        
+        for(int i =0; i<unitList.size(); i++ ){
+            
+            if(s.equals(unitList.get(i).getName())){
+                  return unitList.get(i) ;
+            }
         }
         
         
+        return null;
             
     }
     
@@ -140,6 +162,7 @@ public class App extends JFrame implements ActionListener{
     
     public static void main(String[] args){
         App app = new App();
+
         
         
     }
